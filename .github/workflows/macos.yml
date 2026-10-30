@@ -21,6 +21,12 @@ jobs:
           xcodebuild -project DeepFocusMode.xcodeproj -scheme DeepFocusMode
           -configuration Release -destination 'platform=macOS'
           -derivedDataPath build/CI-Sandbox build
+      - name: Test sandbox configuration
+        run: >-
+          xcodebuild -project DeepFocusMode.xcodeproj -scheme DeepFocusMode
+          -configuration Debug -destination 'platform=macOS'
+          -derivedDataPath build/CI-SandboxTests
+          CODE_SIGN_STYLE=Automatic CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= test
       - name: Test direct configuration
         run: >-
           xcodebuild -project DeepFocusMode.xcodeproj -scheme DeepFocusMode-Direct

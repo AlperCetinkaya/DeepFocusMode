@@ -77,40 +77,11 @@ final class FocusSafetyTests: XCTestCase {
     }
 
     @MainActor
-    func testMissingPermissionNeverStartsTrackingOrRendering() async {
-        let provider = FocusStub()
-        let renderer = RenderSpy()
-        let coordinator = FocusCoordinator(provider: provider, renderer: renderer)
-        coordinator.setEnabled(true, permissionGranted: false)
-        provider.onChange?(.window(CGRect(x: 100, y: 100, width: 500, height: 400)))
-        XCTAssertFalse(coordinator.isEnabled)
-        XCTAssertEqual(coordinator.status, .permissionNeeded)
-        XCTAssertEqual(provider.starts, 0)
-        XCTAssertEqual(renderer.renders, 0)
-    }
-
-    @MainActor
-    func testRevocationClearsOverlayAndLateEventsCannotRestoreIt() async {
-        let provider = FocusStub()
-        let renderer = RenderSpy()
-        let coordinator = FocusCoordinator(provider: provider, renderer: renderer)
-        coordinator.setEnabled(true, permissionGranted: true)
-        provider.onChange?(.window(CGRect(x: 100, y: 100, width: 500, height: 400)))
-        XCTAssertTrue(renderer.visible)
-        coordinator.permissionRevoked()
-        provider.onChange?(.window(CGRect(x: 200, y: 200, width: 500, height: 400)))
-        XCTAssertFalse(renderer.visible)
-        XCTAssertFalse(coordinator.isEnabled)
-        XCTAssertEqual(provider.stops, 1)
-        XCTAssertEqual(renderer.renders, 1)
-    }
-
-    @MainActor
     func testMissingFocusAndUnsupportedSpacesClearOverlayWithoutDisablingToggle() async {
         let provider = FocusStub()
         let renderer = RenderSpy()
         let coordinator = FocusCoordinator(provider: provider, renderer: renderer)
-        coordinator.setEnabled(true, permissionGranted: true)
+        coordinator.setEnabled(true)
         provider.onChange?(.window(CGRect(x: 0, y: 0, width: 500, height: 400)))
         provider.onChange?(.unavailable)
         XCTAssertFalse(renderer.visible)
@@ -127,12 +98,14 @@ final class FocusSafetyTests: XCTestCase {
         let provider = FocusStub()
         let renderer = RenderSpy()
         let coordinator = FocusCoordinator(provider: provider, renderer: renderer)
-        coordinator.setEnabled(true, permissionGranted: true)
+        coordinator.setEnabled(true)
         provider.onChange?(.window(CGRect(x: 0, y: 0, width: 500, height: 400)))
-        coordinator.setEnabled(false, permissionGranted: true)
+        coordinator.setEnabled(false)
         XCTAssertFalse(renderer.visible)
         XCTAssertEqual(coordinator.status, .off)
         XCTAssertEqual(provider.stops, 1)
+        provider.onChange?(.window(CGRect(x: 0, y: 0, width: 500, height: 400)))
+        XCTAssertFalse(renderer.visible)
     }
 
     @MainActor

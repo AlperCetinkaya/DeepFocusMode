@@ -1,6 +1,5 @@
 import AppKit
-import ApplicationServices
-import OSLog
+import CoreGraphics
 
 enum FocusSnapshot: Equatable {
     case window(CGRect)
@@ -16,69 +15,144 @@ protocol WindowFocusProviding: AnyObject {
     func refresh()
 }
 
+/// Retain geometry and numeric identifiers only, never window titles or images.
+struct WindowMetadata {
+    let id: CGWindowID
+    let ownerPID: pid_t
+    let layer: Int
+    let bounds: CGRect
+    let alpha: Double
+
+    init(id: CGWindowID, ownerPID: pid_t, layer: Int = 0, bounds: CGRect, alpha: Double = 1) {
+        self.id = id
+        self.ownerPID = ownerPID
+        self.layer = layer
+        self.bounds = bounds
+        self.alpha = alpha
+    }
+
+    init?(dictionary: [String: Any]) {
+        guard let id = dictionary[kCGWindowNumber as String] as? NSNumber,
+              let pid = dictionary[kCGWindowOwnerPID as String] as? NSNumber,
+              let layer = dictionary[kCGWindowLayer as String] as? NSNumber,
+              let bounds = dictionary[kCGWindowBounds as String] as? [String: Any],
+              let rect = CGRect(dictionaryRepresentation: bounds as CFDictionary),
+              OverlayGeometry.appKitRect(fromWindowServer: rect, primaryDisplayHeight: 0) != nil
+        else { return nil }
+        self.init(id: id.uint32Value, ownerPID: pid.int32Value, layer: layer.intValue,
+                  bounds: rect, alpha: (dictionary[kCGWindowAlpha as String] as? NSNumber)?.doubleValue ?? 1)
+    }
+
+    static func onScreen() -> [WindowMetadata] {
+        // Apple documents this array as front-to-back. No capture API, title key,
+        // permission prompt, private API or Accessibility call is used here.
+        let rows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements],
+                                              kCGNullWindowID) as? [[String: Any]] ?? []
+        return rows.compactMap(WindowMetadata.init(dictionary:))
+    }
+
+    static func windowID(from number: Int) -> CGWindowID? {
+        guard number > 0 else { return nil }
+        return CGWindowID(exactly: number)
+    }
+}
+
+enum WindowSelection {
+    static func snapshot(windows: [WindowMetadata], frontmostPID: pid_t,
+                         ignoredWindowIDs: Set<CGWindowID>, protectedPIDs: Set<pid_t>,
+                         screens: [CGRect], primaryDisplayHeight: CGFloat) -> FocusSnapshot {
+        for window in windows where !ignoredWindowIDs.contains(window.id) && window.alpha > 0 {
+            if protectedPIDs.contains(window.ownerPID) { return .unavailable }
+            guard window.layer == 0 else { continue }
+            // A transition, another app's dialog or an uncertain front window
+            // must never leave an opening over a background window.
+            guard window.ownerPID == frontmostPID,
+                  window.bounds.width >= 100, window.bounds.height >= 80,
+                  let rect = OverlayGeometry.appKitRect(fromWindowServer: window.bounds,
+                                                        primaryDisplayHeight: primaryDisplayHeight),
+                  screens.contains(where: { $0.intersects(rect) }) else { return .unavailable }
+            if screens.contains(where: { rect.insetBy(dx: -1, dy: -1).contains($0) }) {
+                return .unsupported
+            }
+            return .window(rect)
+        }
+        return .unavailable
+    }
+}
+
 @MainActor
 final class WindowFocusProvider: WindowFocusProviding {
     var onChange: ((FocusSnapshot) -> Void)?
     private var workspaceTokens: [NSObjectProtocol] = []
     private var appTokens: [NSObjectProtocol] = []
-    private var observer: AXObserver?
-    private var observedApplication: AXUIElement?
-    private var observedWindow: AXUIElement?
-    private var observedPID: pid_t?
+    private var globalMouseMonitor: Any?
+    private var localMouseMonitor: Any?
     private var refreshWork: DispatchWorkItem?
+    private var reconciliationTimer: Timer?
     private var isRunning = false
-    private let logger = Logger(subsystem: "com.alpercetinkaya.deepfocusmode", category: "WindowFocus")
-    private var lastDiagnostic = ""
-    private let appNotifications = [kAXFocusedWindowChangedNotification, kAXMainWindowChangedNotification,
-                                    kAXFocusedUIElementChangedNotification]
-    private let windowNotifications = [kAXMovedNotification, kAXResizedNotification, kAXUIElementDestroyedNotification]
+    private var isSuspended = false
+    private var isDragging = false
+    private var finderDesktopSelected = false
+    private var lastPointerClick: CGPoint?
+    private var lastSnapshot: FocusSnapshot?
 
     func start() {
         guard !isRunning else { return }
         isRunning = true
+        isSuspended = false
         let workspace = NSWorkspace.shared.notificationCenter
         for name in [NSWorkspace.didActivateApplicationNotification,
                      NSWorkspace.activeSpaceDidChangeNotification,
-                     NSWorkspace.didWakeNotification,
-                     NSWorkspace.screensDidWakeNotification] {
+                     NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification,
+                     NSWorkspace.sessionDidBecomeActiveNotification] {
             workspaceTokens.append(workspace.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.scheduleRefresh() }
+                MainActor.assumeIsolated {
+                    self?.isSuspended = false
+                    self?.finderDesktopSelected = false
+                    self?.scheduleRefresh()
+                }
             })
         }
         for name in [NSWorkspace.willSleepNotification, NSWorkspace.screensDidSleepNotification,
                      NSWorkspace.sessionDidResignActiveNotification] {
             workspaceTokens.append(workspace.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated {
+                    self?.isSuspended = true
                     self?.refreshWork?.cancel()
-                    self?.onChange?(.unavailable)
+                    self?.emit(.unavailable)
                 }
             })
         }
-        workspaceTokens.append(workspace.addObserver(forName: NSWorkspace.sessionDidBecomeActiveNotification,
-                                                     object: nil, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.scheduleRefresh() }
-        })
-        appTokens.append(NotificationCenter.default.addObserver(
-            forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.scheduleRefresh() }
-        })
-        for name in [NSWindow.didBecomeKeyNotification, NSWindow.didMoveNotification,
+        for name in [NSApplication.didChangeScreenParametersNotification,
+                     NSApplication.didBecomeActiveNotification, NSApplication.didResignActiveNotification,
+                     NSWindow.didBecomeKeyNotification, NSWindow.didMoveNotification,
                      NSWindow.didResizeNotification, NSWindow.willCloseNotification] {
-            appTokens.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] notification in
+            appTokens.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
+                let window = note.object as? NSWindow
                 MainActor.assumeIsolated {
-                    // The borderless overlay panels must never trigger a refresh themselves.
-                    guard let window = notification.object as? NSWindow,
-                          window.styleMask.contains(.titled) else { return }
+                    if let window, !window.styleMask.contains(.titled) { return }
                     self?.scheduleRefresh()
                 }
             })
         }
-        for name in [NSApplication.didBecomeActiveNotification, NSApplication.didResignActiveNotification] {
-            appTokens.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.scheduleRefresh() }
-            })
+        let mouseEvents: NSEvent.EventTypeMask = [.leftMouseDown, .rightMouseDown, .otherMouseDown,
+                                                 .leftMouseUp, .rightMouseUp, .otherMouseUp, .leftMouseDragged]
+        globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: mouseEvents) { [weak self] event in
+            MainActor.assumeIsolated { self?.handleMouse(event) }
         }
+        localMouseMonitor = NSEvent.addLocalMonitorForEvents(matching: mouseEvents) { [weak self] event in
+            MainActor.assumeIsolated { self?.handleMouse(event) }
+            return event // Never consume or modify input; never observe keyboard content.
+        }
+        // No public cross-app geometry notifications are available without AX.
+        // Events handle normal interaction; this low-rate, enabled-only fallback
+        // reconciles keyboard-driven window changes. No 60Hz geometry polling.
+        let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.refresh() }
+        }
+        timer.tolerance = 0.25
+        reconciliationTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
         refresh()
     }
 
@@ -86,199 +160,98 @@ final class WindowFocusProvider: WindowFocusProviding {
         isRunning = false
         refreshWork?.cancel()
         refreshWork = nil
+        reconciliationTimer?.invalidate()
+        reconciliationTimer = nil
+        if let globalMouseMonitor { NSEvent.removeMonitor(globalMouseMonitor) }
+        if let localMouseMonitor { NSEvent.removeMonitor(localMouseMonitor) }
+        globalMouseMonitor = nil
+        localMouseMonitor = nil
         workspaceTokens.forEach(NSWorkspace.shared.notificationCenter.removeObserver)
         appTokens.forEach(NotificationCenter.default.removeObserver)
         workspaceTokens.removeAll()
         appTokens.removeAll()
-        removeAXObserver()
+        isDragging = false
+        finderDesktopSelected = false
+        lastPointerClick = nil
+        lastSnapshot = nil
+    }
+
+    private func handleMouse(_ event: NSEvent) {
+        guard isRunning else { return }
+        if event.type == .leftMouseDragged {
+            isDragging = true
+            refreshWork?.cancel()
+            emit(.unavailable)
+            return
+        }
+        isDragging = false
+        if [.leftMouseDown, .rightMouseDown, .otherMouseDown].contains(event.type) {
+            lastPointerClick = NSEvent.mouseLocation
+        }
+        scheduleRefresh()
     }
 
     private func scheduleRefresh() {
         guard isRunning else { return }
-        onChange?(.unavailable)
+        emit(.unavailable)
         refreshWork?.cancel()
         let work = DispatchWorkItem { [weak self] in self?.refresh() }
         refreshWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.06, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: work)
     }
 
     func refresh() {
-        guard isRunning, AXIsProcessTrusted() else {
-            unavailable("permission_missing_or_tracking_stopped")
+        guard isRunning else { return }
+        guard !isSuspended, !isDragging, let primary = NSScreen.screens.first else {
+            emit(.unavailable)
             return
         }
-        // Settings is a real focus target too: changing opacity should show its effect
-        // immediately, without activating another app or asking AX about our own process.
-        if NSApp.isActive, let window = NSApp.keyWindow,
-           window.styleMask.contains(.titled), window.isVisible {
-            onChange?(.window(window.frame))
+        if NSApp.isActive, let window = NSApp.keyWindow, window.styleMask.contains(.titled), window.isVisible {
+            lastPointerClick = nil
+            emit(window.attachedSheet == nil && NSApp.modalWindow == nil ? .window(window.frame) : .unavailable)
             return
         }
-        guard
-              let app = NSWorkspace.shared.frontmostApplication,
-              app.activationPolicy == .regular,
+        guard let app = NSWorkspace.shared.frontmostApplication, app.activationPolicy == .regular,
               app.processIdentifier != ProcessInfo.processInfo.processIdentifier,
               !Self.protectedApps.contains(app.bundleIdentifier ?? "") else {
-            unavailable("inactive_or_protected_app")
+            lastPointerClick = nil
+            emit(.unavailable)
             return
         }
-        attachObserver(to: app.processIdentifier)
-        guard observer != nil else {
-            onChange?(.unsupported)
-            return
-        }
-        guard let application = observedApplication,
-              let window = attribute(application, kAXFocusedWindowAttribute),
-              CFGetTypeID(window) == AXUIElementGetTypeID() else {
-            unavailable("focused_window_missing")
-            return
-        }
-        let focusedWindow = unsafeBitCast(window, to: AXUIElement.self)
-        guard observeWindow(focusedWindow) else {
-            onChange?(.unsupported)
-            return
-        }
-        guard let subrole = attribute(focusedWindow, kAXSubroleAttribute) as? String,
-              subrole == kAXStandardWindowSubrole,
-              (attribute(focusedWindow, kAXModalAttribute) as? Bool) != true,
-              !hasSheet(focusedWindow),
-              let pointValue = attribute(focusedWindow, kAXPositionAttribute),
-              let sizeValue = attribute(focusedWindow, kAXSizeAttribute),
-              CFGetTypeID(pointValue) == AXValueGetTypeID(),
-              CFGetTypeID(sizeValue) == AXValueGetTypeID() else {
-            unavailable("window_geometry_or_modal")
-            return
-        }
-        // Finder may keep its last window around while the desktop has keyboard focus.
-        if app.bundleIdentifier == "com.apple.finder",
-           let focused = attribute(application, kAXFocusedUIElementAttribute),
-           CFGetTypeID(focused) == AXUIElementGetTypeID() {
-            let element = unsafeBitCast(focused, to: AXUIElement.self)
-            guard let ownerWindow = attribute(element, kAXWindowAttribute),
-                  CFEqual(ownerWindow, focusedWindow) else {
-                unavailable("finder_desktop_or_focus_transition")
-                return
+        let windows = WindowMetadata.onScreen()
+        if app.bundleIdentifier == "com.apple.finder" {
+            if let point = lastPointerClick {
+                finderDesktopSelected = !windows.contains {
+                    $0.ownerPID == app.processIdentifier && $0.layer == 0 &&
+                    OverlayGeometry.appKitRect(fromWindowServer: $0.bounds, primaryDisplayHeight: primary.frame.height)?.contains(point) == true
+                }
             }
-        }
-        var origin = CGPoint.zero
-        var size = CGSize.zero
-        guard AXValueGetValue(unsafeBitCast(pointValue, to: AXValue.self), .cgPoint, &origin),
-              AXValueGetValue(unsafeBitCast(sizeValue, to: AXValue.self), .cgSize, &size),
-              let primary = NSScreen.screens.first,
-              let rect = OverlayGeometry.appKitRect(fromAX: CGRect(origin: origin, size: size),
-                                                     primaryDisplayHeight: primary.frame.height),
-              NSScreen.screens.contains(where: { $0.frame.intersects(rect) }) else {
-            unavailable("invalid_or_offscreen_geometry")
-            return
-        }
-        // Full-screen behavior needs separate device QA; avoid shading other Spaces in this spike.
-        if NSScreen.screens.contains(where: {
-            rect.insetBy(dx: -1, dy: -1).contains($0.frame)
-        }) {
-            onChange?(.unsupported)
-        } else {
-            if lastDiagnostic != "ready" {
-                logger.notice("Window tracking ready")
-                lastDiagnostic = "ready"
-            }
-            onChange?(.window(rect))
-        }
+        } else { finderDesktopSelected = false }
+        lastPointerClick = nil
+        guard !finderDesktopSelected else { emit(.unavailable); return }
+        let ignored = Set(NSApp.windows.filter { !$0.styleMask.contains(.titled) }
+            .compactMap { WindowMetadata.windowID(from: $0.windowNumber) })
+        let protected = Set(windows.compactMap { window -> pid_t? in
+            guard window.bounds.width > 100, window.bounds.height > 80,
+                  let bundleID = NSRunningApplication(processIdentifier: window.ownerPID)?.bundleIdentifier,
+                  bundleID != "com.apple.dock",
+                  Self.protectedApps.contains(bundleID) else { return nil }
+            return window.ownerPID
+        })
+        emit(WindowSelection.snapshot(windows: windows, frontmostPID: app.processIdentifier,
+                                       ignoredWindowIDs: ignored, protectedPIDs: protected,
+                                       screens: NSScreen.screens.map(\.frame), primaryDisplayHeight: primary.frame.height))
     }
 
-    private func unavailable(_ reason: String) {
-        if reason != lastDiagnostic {
-            logger.notice("Window tracking paused: \(reason, privacy: .public)")
-            lastDiagnostic = reason
-        }
-        onChange?(.unavailable)
+    private func emit(_ snapshot: FocusSnapshot) {
+        guard isRunning, snapshot != lastSnapshot else { return }
+        lastSnapshot = snapshot
+        onChange?(snapshot)
     }
 
     private static let protectedApps: Set<String> = [
         "com.apple.systempreferences", "com.apple.SecurityAgent", "com.apple.loginwindow",
-        "com.apple.notificationcenterui", "com.apple.controlcenter", "com.apple.dock"
+        "com.apple.notificationcenterui", "com.apple.controlcenter", "com.apple.dock",
+        "com.apple.LocalAuthentication.UIAgent", "com.apple.CoreServicesUIAgent"
     ]
-
-    private func attribute(_ element: AXUIElement, _ name: String) -> CFTypeRef? {
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success else { return nil }
-        return value
-    }
-
-    private func hasSheet(_ window: AXUIElement) -> Bool {
-        let children = attribute(window, kAXChildrenAttribute) as? [AXUIElement] ?? []
-        return children.contains { attribute($0, kAXRoleAttribute) as? String == kAXSheetRole }
-    }
-
-    private func attachObserver(to pid: pid_t) {
-        guard observedPID != pid || observer == nil else { return }
-        removeAXObserver()
-        let application = AXUIElementCreateApplication(pid)
-        AXUIElementSetMessagingTimeout(application, 0.2)
-        observedApplication = application
-        observedPID = pid
-        var created: AXObserver?
-        let callback: AXObserverCallback = { _, _, _, context in
-            guard let context else { return }
-            MainActor.assumeIsolated {
-                Unmanaged<WindowFocusProvider>.fromOpaque(context).takeUnretainedValue().refresh()
-            }
-        }
-        let createResult = AXObserverCreate(pid, callback, &created)
-        guard createResult == .success, let created else {
-            logger.error("AX observer creation failed: \(createResult.rawValue)")
-            return
-        }
-        // Without focus-change notifications, an old cutout could remain over a new window.
-        let focusResult = AXObserverAddNotification(created, application, kAXFocusedWindowChangedNotification as CFString,
-                                                    Unmanaged.passUnretained(self).toOpaque())
-        guard focusResult == .success else {
-            logger.error("AX focus notification registration failed: \(focusResult.rawValue)")
-            return
-        }
-        observer = created
-        for name in appNotifications.dropFirst() {
-            AXObserverAddNotification(created, application, name as CFString,
-                                      Unmanaged.passUnretained(self).toOpaque())
-        }
-        CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(created), .commonModes)
-    }
-
-    private func observeWindow(_ window: AXUIElement) -> Bool {
-        guard let observer else { return false }
-        if let old = observedWindow, CFEqual(old, window) { return true }
-        if let old = observedWindow {
-            for name in windowNotifications { AXObserverRemoveNotification(observer, old, name as CFString) }
-        }
-        observedWindow = window
-        var canTrackGeometry = true
-        for name in windowNotifications {
-            let result = AXObserverAddNotification(observer, window, name as CFString,
-                                                   Unmanaged.passUnretained(self).toOpaque())
-            if name != kAXUIElementDestroyedNotification, result != .success {
-                canTrackGeometry = false
-                logger.error("AX geometry notification registration failed: \(result.rawValue)")
-            }
-        }
-        if !canTrackGeometry {
-            for name in windowNotifications { AXObserverRemoveNotification(observer, window, name as CFString) }
-            observedWindow = nil
-        }
-        return canTrackGeometry
-    }
-
-    private func removeAXObserver() {
-        if let observer {
-            if let application = observedApplication {
-                for name in appNotifications { AXObserverRemoveNotification(observer, application, name as CFString) }
-            }
-            if let window = observedWindow {
-                for name in windowNotifications { AXObserverRemoveNotification(observer, window, name as CFString) }
-            }
-            CFRunLoopRemoveSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .commonModes)
-        }
-        observer = nil
-        observedApplication = nil
-        observedWindow = nil
-        observedPID = nil
-    }
 }

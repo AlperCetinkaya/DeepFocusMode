@@ -27,10 +27,6 @@ struct FocusMenuView: View {
 
             OpacityControl(preferences: preferences)
 
-            if model.permissionState != .granted {
-                PermissionExplanation(model: model)
-            }
-
             Divider()
             HStack {
                 SettingsLink { Label("action.settings", systemImage: "gearshape") }
@@ -57,28 +53,5 @@ struct OpacityControl: View {
             Slider(value: $preferences.opacity, in: 0...0.85) { Text("dimming.intensity") }
                 .labelsHidden()
         }
-    }
-}
-
-struct PermissionExplanation: View {
-    @ObservedObject var model: AppModel
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label("permission.title", systemImage: "hand.raised")
-                .font(.subheadline.weight(.semibold))
-            Text("permission.explanation").font(.caption).foregroundStyle(.secondary)
-            if model.permissionState == .revoked {
-                Text("permission.revoked").font(.caption).foregroundStyle(.secondary)
-            }
-            HStack {
-                Button("permission.allow") { model.requestPermission() }
-                Button("permission.open") { model.openPermissionSettings() }
-            }
-            Button("permission.check") { model.refreshPermission() }
-                .buttonStyle(.link)
-                .font(.caption)
-        }
-        .padding(12)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
     }
 }

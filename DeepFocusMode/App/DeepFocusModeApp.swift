@@ -7,7 +7,6 @@ struct DeepFocusModeApp: App {
     var body: some Scene {
         MenuBarExtra {
             FocusMenuView(model: delegate.model, preferences: delegate.model.preferences)
-                .onAppear { delegate.model.refreshPermission() }
         } label: {
             FocusMenuLabel(model: delegate.model)
         }
@@ -15,7 +14,6 @@ struct DeepFocusModeApp: App {
 
         Settings {
             FocusSettingsView(model: delegate.model, preferences: delegate.model.preferences)
-                .onAppear { delegate.model.refreshPermission() }
         }
     }
 }
@@ -38,7 +36,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showSettings() {
-        model.refreshPermission()
         if welcomeWindow == nil {
             let view = FocusSettingsView(model: model, preferences: model.preferences)
             let window = NSWindow(contentViewController: NSHostingController(rootView: view))

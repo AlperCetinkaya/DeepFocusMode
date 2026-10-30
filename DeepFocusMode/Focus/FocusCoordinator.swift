@@ -2,7 +2,6 @@ import Foundation
 
 enum FocusStatus: String {
     case off = "status.off"
-    case permissionNeeded = "status.permission"
     case waiting = "status.waiting"
     case active = "status.active"
     case unsupported = "status.unsupported"
@@ -26,23 +25,17 @@ final class FocusCoordinator {
         provider.onChange = { [weak self] snapshot in self?.consume(snapshot) }
     }
 
-    func setEnabled(_ enabled: Bool, permissionGranted: Bool) {
+    func setEnabled(_ enabled: Bool) {
         renderer.clear()
         latest = .unavailable
-        isEnabled = enabled && permissionGranted
+        isEnabled = enabled
         if isEnabled {
             status = .waiting
             provider.start()
         } else {
             provider.stop()
-            status = enabled ? .permissionNeeded : .off
+            status = .off
         }
-        onChange?()
-    }
-
-    func permissionRevoked() {
-        setEnabled(false, permissionGranted: false)
-        status = .permissionNeeded
         onChange?()
     }
 

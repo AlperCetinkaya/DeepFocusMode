@@ -1,12 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
-# Use an installed Apple Development identity so AX permission survives rebuilds.
+# Use an installed Apple Development identity for trusted local builds.
 # No certificate, private key, team identifier or account credentials are stored here.
-configuration="${1:-Direct}"
+configuration="${1:-Release}"
 action="${2:-build}"
 case "$configuration" in Debug|Release|Direct) ;; *) echo "Use Debug, Release or Direct." >&2; exit 2;; esac
-case "$action" in build|test) ;; *) echo "Use build or test." >&2; exit 2;; esac
+case "$action" in build|test|archive) ;; *) echo "Use build, test or archive." >&2; exit 2;; esac
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 identity_line="$(security find-identity -v -p codesigning | sed -n '/"Apple Development:/ {p;q;}')"
 signing_hash="$(printf '%s' "$identity_line" | awk '{print $2}')"
@@ -27,6 +27,9 @@ derived_data="$project_root/build/DerivedData"
 set --
 if [[ "$action" == test ]]; then
     set -- ENABLE_TESTABILITY=YES SWIFT_OPTIMIZATION_LEVEL=-Onone
+fi
+if [[ "$action" == archive ]]; then
+    set -- -archivePath "$project_root/build/Archives/DeepFocusMode.xcarchive"
 fi
 if [[ "$configuration" == Direct ]]; then
     scheme="DeepFocusMode-Direct"

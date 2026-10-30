@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "build": "2",
+  "bundleIdentifier": "com.alpercetinkaya.deepfocusmode",
+  "category": "Productivity",
+  "price": "Free",
+  "minimumSystemVersion": "14.0",
+  "supportURL": "https://alpercetinkaya.github.io/DeepFocusMode/",
+  "privacyPolicyURL": "https://alpercetinkaya.github.io/DeepFocusMode/privacy.html",
+  "appPrivacy": "Data Not Collected: geometry is processed in memory and preferences remain local; no app data is transmitted.",
+  "reviewNotes": "Native macOS menu bar utility. No account, Accessibility access or Screen Recording permission is needed. Open the menu bar icon, enable Quick Focus, and activate a standard Finder or other application window. Move or resize the window and adjust opacity in Settings. Dimming temporarily pauses while dragging and resumes on release. Full-screen windows and protected system UI suspend dimming. Overlays ignore mouse input. Reopening the app from Finder reveals Settings. The privacy policy is available in Settings. This version contains Quick Focus only; it does not advertise session timers. The sandbox is enabled and the app uses public Core Graphics window metadata, not screen capture or AXUIElement APIs.",
+  "localizations": {
+    "en-US": {
+      "name": "Deep Focus Mode",
+      "subtitle": "Dim distractions. Find focus.",
+      "keywords": "focus,dimming,window,concentration,desktop,productivity",
+      "description": "Keep your active window bright and dim distractions around it. Deep Focus Mode is a free native macOS menu bar utility with adjustable dimming, rounded window openings, and English and Turkish interfaces. It works entirely offline, without accounts, advertising, tracking or subscriptions. No Accessibility or Screen Recording permission is required. Enable Quick Focus from the menu bar, choose an intensity from 0% to 85%, and keep working. Dimming starts off after each launch and pauses in unsupported views, including full-screen windows. Version 1.0 focuses on instant window dimming; session timers are not included."
+    },
+    "tr": {
+      "name": "Deep Focus Mode",
+      "subtitle": "Dikkat dağıtan alanları karart",
+      "keywords": "odak,karartma,pencere,konsantrasyon,masaüstü,verimlilik",
+      "description": "Etkin pencereniz aydınlık kalırken dikkat dağıtan alanlar kararsın. Deep Focus Mode; ayarlanabilir karartma, yuvarlatılmış pencere açıklığı ve Türkçe/İngilizce arayüz sunan ücretsiz, yerel bir macOS menü çubuğu uygulamasıdır. Hesap, reklam, takip veya abonelik olmadan tamamen çevrimdışı çalışır. Erişilebilirlik veya Ekran Kaydı izni gerekmez. Menü çubuğundan Hızlı Odak’ı açın, %0–85 arasında bir yoğunluk seçin ve çalışmaya devam edin. Karartma her açılışta kapalı başlar; tam ekran pencereler dahil desteklenmeyen görünümlerde duraklar. 1.0 sürümü anlık pencere karartmasına odaklanır; oturum zamanlayıcıları içermez."
+    }
+  },
+  "pendingAccountTasks": [
+    "Confirm app name and register Bundle ID in the owner account",
+    "Create the App Store Connect macOS app record",
+    "Create or select App Store distribution signing and provisioning",
+    "Complete age rating, content rights, availability and privacy questionnaire",
+    "Provide review contact details privately in App Store Connect",
+    "Validate and export/upload the archive with App Store signing",
+    "Attach genuine Mac screenshots and verify support/privacy URLs",
+    "Approve final submission separately"
+  ]
+}
