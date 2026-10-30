@@ -33,6 +33,7 @@ struct FocusSettingsView: View {
                 Text("settings.privacy").foregroundStyle(.secondary)
                 Text("settings.language").font(.caption).foregroundStyle(.secondary)
                 Link("support.action", destination: URL(string: "https://github.com/AlperCetinkaya/DeepFocusMode/issues")!)
+                Link("support.email", destination: URL(string: "mailto:alper.cetinkaya.dev@gmail.com")!)
             }
         }
         .formStyle(.grouped)

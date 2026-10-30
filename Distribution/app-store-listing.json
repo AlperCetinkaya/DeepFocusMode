@@ -33,5 +33,6 @@
     "Attach genuine Mac screenshots and verify support/privacy URLs",
     "Approve final submission separately",
     "Resolve inherited personal-domain HTTPS before using the support/privacy links in the Store listing"
-  ]
+  ],
+  "supportEmail": "alper.cetinkaya.dev@gmail.com"
 }

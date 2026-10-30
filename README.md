@@ -154,3 +154,5 @@ python3 Scripts/check-archive.py
 The checker reports distribution signing separately. With Store signing configured, use `Distribution/AppStoreExportOptions.plist` for a local export; it specifies `destination=export`, not an upload. / Kontrol aracı dağıtım imzasını ayrı raporlar. Mağaza imzaları ayarlandıktan sonra yerel aktarım için `Distribution/AppStoreExportOptions.plist` kullanılabilir; bu dosya yükleme yapmaz.
 
 The project Pages site currently inherits the account’s personal custom domain. HTTPS for that domain needs repair before finalizing Store links. / Proje Pages sitesi hesabın kişisel alan adını devralıyor. Mağaza bağlantıları kesinleştirilmeden önce bu alan adının HTTPS yapılandırması düzeltilmelidir.
+
+Support / Destek: [alper.cetinkaya.dev@gmail.com](mailto:alper.cetinkaya.dev@gmail.com).
