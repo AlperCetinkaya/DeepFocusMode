@@ -26,11 +26,12 @@
   "pendingAccountTasks": [
     "Confirm app name and register Bundle ID in the owner account",
     "Create the App Store Connect macOS app record",
-    "Create or select App Store distribution signing and provisioning",
+    "Create/select Mac App Distribution and Mac Installer Distribution signing certificates plus an App Store provisioning profile for this Bundle ID",
     "Complete age rating, content rights, availability and privacy questionnaire",
     "Provide review contact details privately in App Store Connect",
     "Validate and export/upload the archive with App Store signing",
     "Attach genuine Mac screenshots and verify support/privacy URLs",
-    "Approve final submission separately"
+    "Approve final submission separately",
+    "Resolve inherited personal-domain HTTPS before using the support/privacy links in the Store listing"
   ]
 }
