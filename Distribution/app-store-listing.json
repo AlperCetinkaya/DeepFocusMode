@@ -24,11 +24,31 @@
     }
   },
   "pendingAccountTasks": [
-    "Complete privacy questionnaire, free pricing and availability",
-    "Owner to determine DSA trader status for EU distribution",
-    "Attach genuine Mac screenshots",
-    "Complete remaining physical-device compatibility checks",
-    "Approve package upload and final review submission separately"
+    "Complete remaining physical-device compatibility checks; owner deferred the two-display test",
+    "Approve final review submission separately"
   ],
-  "supportEmail": "alper.cetinkaya.dev@gmail.com"
+  "supportEmail": "alper.cetinkaya.dev@gmail.com",
+  "availability": {
+    "excludedRegions": "European Union (27 member states), per owner instruction",
+    "selectedRegionCount": 148,
+    "automaticallyIncludeFutureRegions": false
+  },
+  "screenshots": {
+    "en-US": "en-settings.jpg",
+    "tr": "tr-settings.jpg",
+    "pixelSize": [
+      2560,
+      1600
+    ],
+    "source": "Shipping native Settings view/model inside a marketing capture frame; no private content"
+  },
+  "submissionStatus": {
+    "appleValidation": "passed",
+    "upload": "completed",
+    "privacyDeclaration": "published",
+    "appReview": "not submitted",
+    "release": "manual",
+    "appleProcessing": "completed",
+    "selectedBuild": "2"
+  }
 }

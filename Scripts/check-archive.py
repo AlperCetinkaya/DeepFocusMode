@@ -25,6 +25,8 @@ def inspect(archive: Path) -> dict:
     assert info['LSApplicationCategoryType'] == 'public.app-category.productivity'
     assert info['LSMinimumSystemVersion'] == '14.0'
     assert info.get('ITSAppUsesNonExemptEncryption') is False, 'Encryption declaration is missing'
+    icon = Path(info['CFBundleIconFile'])
+    assert (contents / 'Resources' / icon.with_suffix('.icns')).is_file(), 'App icon is missing'
     assert privacy['NSPrivacyTracking'] is False
     assert privacy['NSPrivacyCollectedDataTypes'] == []
     reasons = privacy['NSPrivacyAccessedAPITypes']
@@ -46,6 +48,7 @@ def inspect(archive: Path) -> dict:
         'architectures': architecture.split(),
         'sandbox': True,
         'privacyManifest': True,
+        'appIcon': True,
         'nonExemptEncryption': False,
         'languages': ['en', 'tr'],
         'accessibilityOrScreenCaptureImports': False,

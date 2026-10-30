@@ -6,6 +6,11 @@ DerivedData/
 xcuserdata/
 *.xcresult
 *.p12
+*.p8
+*.key
+*.pem
+*.csr
+*.cer
 *.mobileprovision
 *.provisionprofile
 
