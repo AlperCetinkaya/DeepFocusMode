@@ -36,7 +36,7 @@ Full-screen windows and dragging currently suspend dimming. The owner confirmed 
 
 ### Build and use
 
-Requirements: **macOS 14 or later** and **Xcode with a compatible macOS SDK**. The project has no external package dependencies.
+Requirements: **macOS 14 or later** and **Xcode with a compatible macOS SDK**. The project has no external package dependencies. Xcode 26 or later is required to compile the modern Icon Composer asset; the app deployment target remains macOS 14.
 
 1. Clone this repository and open `DeepFocusMode.xcodeproj` in Xcode.
 2. Select the **DeepFocusMode** scheme and **My Mac**. Choose your Apple Development signing identity in Signing & Capabilities.
@@ -86,7 +86,7 @@ Tam ekran pencerelerde ve sürükleme sırasında karartma geçici olarak kaldı
 
 ### Derleme ve kullanım
 
-Gereksinimler: **macOS 14 veya üzeri** ve **uyumlu macOS SDK içeren Xcode**. Harici paket bağımlılığı yoktur.
+Gereksinimler: **macOS 14 veya üzeri** ve **uyumlu macOS SDK içeren Xcode**. Harici paket bağımlılığı yoktur. Yeni Icon Composer simgesini derlemek için Xcode 26 veya üzeri gerekir; uygulamanın alt sınırı macOS 14 olarak kalır.
 
 1. Depoyu bilgisayarına al ve `DeepFocusMode.xcodeproj` dosyasını Xcode ile aç.
 2. **DeepFocusMode** şemasını ve **My Mac** hedefini seç. Etkileşimli kullanım için Signing & Capabilities bölümünde Apple Development imza kimliğini ayarla.

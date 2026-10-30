@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "build": "2",
+  "build": "3",
   "bundleIdentifier": "com.alpercetinkaya.deepfocusmode",
   "category": "Productivity",
   "price": "Free",
@@ -24,7 +24,8 @@
     }
   },
   "pendingAccountTasks": [
-    "Complete remaining physical-device compatibility checks; owner deferred the two-display test",
+    "Resolve the extra gray frame/inset seen in Apple icon preview; verify final store icon scale before review submission",
+    "Complete remaining compatibility checks: display hotplug, Stage Manager, sleep/wake and screen sharing",
     "Approve final review submission separately"
   ],
   "supportEmail": "alper.cetinkaya.dev@gmail.com",
@@ -50,5 +51,19 @@
     "release": "manual",
     "appleProcessing": "completed",
     "selectedBuild": "2"
+  },
+  "appIconReview": {
+    "artwork": "Original owner-provided blue moon and dunes",
+    "embeddedInUploadedBuild": true,
+    "visualGate": "Apple preview showed an extra gray rounded tile around the artwork; packaging/scale must be corrected and preview rechecked before submission",
+    "localCandidateFormat": "Icon Composer package; original image unchanged, 112% layout scale, opaque dark background, layer glass disabled",
+    "candidateBuild": "3"
+  },
+  "deviceQA": {
+    "normalWindowSwitching": "owner confirmed",
+    "missionControl": "owner confirmed",
+    "fullScreenRoundTrip": "owner confirmed",
+    "multipleDisplays": "owner confirmed: tested at noon on 2026-10-30",
+    "displayHotplug": "not yet confirmed"
   }
 }

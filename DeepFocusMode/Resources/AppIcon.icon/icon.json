@@ -1,0 +1,34 @@
+{
+  "fill": {
+    "solid": "extended-srgb:0.02500,0.03500,0.07000,1.00000"
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "glass": false,
+          "image-name": "AppIconMaster.png",
+          "name": "AppIconMaster",
+          "position": {
+            "scale": 1.12,
+            "translation-in-points": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0
+      },
+      "translucency": {
+        "enabled": false,
+        "value": 0
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}
