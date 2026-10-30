@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inspect a local archive. This does not upload or assert App Store approval."""
+"""Inspect a local archive or unpacked app, without uploading or asserting Store approval."""
 import argparse
 import json
 import plistlib
@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 def inspect(archive: Path) -> dict:
-    app = archive / 'Products/Applications/DeepFocusMode.app'
+    app = archive if archive.suffix == '.app' else archive / 'Products/Applications/DeepFocusMode.app'
     contents = app / 'Contents'
     info = plistlib.loads((contents / 'Info.plist').read_bytes())
     privacy = plistlib.loads((contents / 'Resources/PrivacyInfo.xcprivacy').read_bytes())
@@ -24,6 +24,7 @@ def inspect(archive: Path) -> dict:
     assert not any('temporary-exception' in key or '.private.' in key for key in entitlements), 'Unexpected exception entitlement'
     assert info['LSApplicationCategoryType'] == 'public.app-category.productivity'
     assert info['LSMinimumSystemVersion'] == '14.0'
+    assert info.get('ITSAppUsesNonExemptEncryption') is False, 'Encryption declaration is missing'
     assert privacy['NSPrivacyTracking'] is False
     assert privacy['NSPrivacyCollectedDataTypes'] == []
     reasons = privacy['NSPrivacyAccessedAPITypes']
@@ -45,6 +46,7 @@ def inspect(archive: Path) -> dict:
         'architectures': architecture.split(),
         'sandbox': True,
         'privacyManifest': True,
+        'nonExemptEncryption': False,
         'languages': ['en', 'tr'],
         'accessibilityOrScreenCaptureImports': False,
         'distributionSigned': distribution,

@@ -5,8 +5,8 @@
   "category": "Productivity",
   "price": "Free",
   "minimumSystemVersion": "14.0",
-  "supportURL": "https://alpercetinkaya.github.io/DeepFocusMode/",
-  "privacyPolicyURL": "https://alpercetinkaya.github.io/DeepFocusMode/privacy.html",
+  "supportURL": "https://github.com/AlperCetinkaya/DeepFocusMode#support--destek",
+  "privacyPolicyURL": "https://github.com/AlperCetinkaya/DeepFocusMode#privacy--gizlilik",
   "appPrivacy": "Data Not Collected: geometry is processed in memory and preferences remain local; no app data is transmitted.",
   "reviewNotes": "Native macOS menu bar utility. No account, Accessibility access or Screen Recording permission is needed. Open the menu bar icon, enable Quick Focus, and activate a standard Finder or other application window. Move or resize the window and adjust opacity in Settings. Dimming temporarily pauses while dragging and resumes on release. Full-screen windows and protected system UI suspend dimming. Overlays ignore mouse input. Reopening the app from Finder reveals Settings. The privacy policy is available in Settings. This version contains Quick Focus only; it does not advertise session timers. The sandbox is enabled and the app uses public Core Graphics window metadata, not screen capture or AXUIElement APIs.",
   "localizations": {
@@ -24,15 +24,11 @@
     }
   },
   "pendingAccountTasks": [
-    "Confirm app name and register Bundle ID in the owner account",
-    "Create the App Store Connect macOS app record",
-    "Create/select Mac App Distribution and Mac Installer Distribution signing certificates plus an App Store provisioning profile for this Bundle ID",
-    "Complete age rating, content rights, availability and privacy questionnaire",
-    "Provide review contact details privately in App Store Connect",
-    "Validate and export/upload the archive with App Store signing",
-    "Attach genuine Mac screenshots and verify support/privacy URLs",
-    "Approve final submission separately",
-    "Resolve inherited personal-domain HTTPS before using the support/privacy links in the Store listing"
+    "Complete privacy questionnaire, free pricing and availability",
+    "Owner to determine DSA trader status for EU distribution",
+    "Attach genuine Mac screenshots",
+    "Complete remaining physical-device compatibility checks",
+    "Approve package upload and final review submission separately"
   ],
   "supportEmail": "alper.cetinkaya.dev@gmail.com"
 }

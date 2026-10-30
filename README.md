@@ -28,7 +28,7 @@ Deep Focus Mode is a free, open-source native macOS menu bar app that dims the a
 
 ### Status and limitations
 
-Version **1.0.0 is a release candidate**, focused on Quick Focus. Window tracking now uses public Core Graphics metadata with the sandbox enabled. A separately signed sandbox probe enumerated external windows on a real Mac with both Accessibility and Screen Recording access denied. This is runtime evidence, not App Store approval. Store distribution signing, final compatibility testing and submission are still pending; no released download is available yet.
+Version **1.0.0 is a release candidate**, focused on Quick Focus. Window tracking now uses public Core Graphics metadata with the sandbox enabled. A separately signed sandbox probe enumerated external windows on a real Mac with both Accessibility and Screen Recording access denied. This is runtime evidence, not App Store approval. The signed App Store package has passed local structural checks; final compatibility testing, store assets and submission are still pending; no released download is available yet.
 
 Local sandbox validation passed **18 tests**, including real AppKit overlay rendering, rounded corners, display-edge geometry and input pass-through checks. CI builds the sandbox configuration and tests both sandbox and Direct configurations.
 
@@ -61,7 +61,7 @@ After the initial Quick Focus release: focus sessions, optional completion notif
 
 ### Privacy and license
 
-No account, backend, tracking, analytics, ads or subscriptions. The app works offline and keeps settings locally. Read the [Privacy Policy](https://alpercetinkaya.github.io/DeepFocusMode/privacy.html). Licensed under the [MIT License](LICENSE).
+No account, backend, tracking, analytics, ads or subscriptions. The app works offline and keeps settings locally. Read the [Privacy Policy](#privacy--gizlilik). Licensed under the [MIT License](LICENSE).
 
 ## Türkçe
 
@@ -78,7 +78,7 @@ Deep Focus Mode, etkin pencerenin çevresini karartarak dikkat dağıtan alanlar
 
 ### Durum ve sınırlamalar
 
-**1.0.0 bir yayın adayıdır** ve Hızlı Odak özelliğine odaklanır. Pencere takibi artık sandbox açıkken herkese açık Core Graphics bilgilerini kullanır. Ayrı imzalanmış bir deneme uygulaması, gerçek Mac’te Erişilebilirlik ve Ekran Kaydı izinleri kapalıyken harici pencereleri listeledi. Bu çalışma kanıtıdır; App Store onayı değildir. Mağaza dağıtım imzası, son uyumluluk testleri ve başvuru henüz tamamlanmadı; indirilebilir yayınlanmış bir sürüm yoktur.
+**1.0.0 bir yayın adayıdır** ve Hızlı Odak özelliğine odaklanır. Pencere takibi artık sandbox açıkken herkese açık Core Graphics bilgilerini kullanır. Ayrı imzalanmış bir deneme uygulaması, gerçek Mac’te Erişilebilirlik ve Ekran Kaydı izinleri kapalıyken harici pencereleri listeledi. Bu çalışma kanıtıdır; App Store onayı değildir. Mağaza imzalı paket yerel yapı kontrollerinden geçti; son uyumluluk testleri, mağaza görselleri ve başvuru henüz tamamlanmadı; indirilebilir yayınlanmış bir sürüm yoktur.
 
 Gerçek AppKit katmanlarının çizimi, yuvarlak köşeler, ekran kenarı geometrisi ve tıklamaları geçirme kontrolleri dahil **sandbox açıkken 18 yerel test geçti**. CI hem sandbox hem Direct yapılandırmalarının testlerini çalıştırır.
 
@@ -111,7 +111,7 @@ Derlenen uygulama: `build/DerivedData/Build/Products/Release/DeepFocusMode.app`.
 
 ### Gizlilik ve lisans
 
-Hesap, sunucu, takip, analiz, reklam ve abonelik yoktur. Uygulama çevrimdışı çalışır; ayarlar yerel olarak saklanır. [Gizlilik Politikası](https://alpercetinkaya.github.io/DeepFocusMode/privacy.html). [MIT Lisansı](LICENSE) ile sunulur.
+Hesap, sunucu, takip, analiz, reklam ve abonelik yoktur. Uygulama çevrimdışı çalışır; ayarlar yerel olarak saklanır. [Gizlilik Politikası](#privacy--gizlilik). [MIT Lisansı](LICENSE) ile sunulur.
 
 ## Development / Geliştirme
 
@@ -153,6 +153,44 @@ python3 Scripts/check-archive.py
 
 The checker reports distribution signing separately. With Store signing configured, use `Distribution/AppStoreExportOptions.plist` for a local export; it specifies `destination=export`, not an upload. / Kontrol aracı dağıtım imzasını ayrı raporlar. Mağaza imzaları ayarlandıktan sonra yerel aktarım için `Distribution/AppStoreExportOptions.plist` kullanılabilir; bu dosya yükleme yapmaz.
 
-The project Pages site currently inherits the account’s personal custom domain. HTTPS for that domain needs repair before finalizing Store links. / Proje Pages sitesi hesabın kişisel alan adını devralıyor. Mağaza bağlantıları kesinleştirilmeden önce bu alan adının HTTPS yapılandırması düzeltilmelidir.
+Store support and privacy links use this public GitHub README over HTTPS. The optional Pages site inherits a personal custom domain whose HTTPS configuration is separate. / Mağaza destek ve gizlilik bağlantıları bu herkese açık GitHub README’sini HTTPS üzerinden kullanır. İsteğe bağlı Pages sitesi, HTTPS yapılandırması ayrı olan kişisel alan adını devralır.
 
 Support / Destek: [alper.cetinkaya.dev@gmail.com](mailto:alper.cetinkaya.dev@gmail.com).
+
+## Support / Destek
+
+For help, email [alper.cetinkaya.dev@gmail.com](mailto:alper.cetinkaya.dev@gmail.com) or open a [GitHub issue](https://github.com/AlperCetinkaya/DeepFocusMode/issues). Include your macOS version, app version and steps to reproduce. Do not share private screen content.
+
+Destek için [alper.cetinkaya.dev@gmail.com](mailto:alper.cetinkaya.dev@gmail.com) adresine yazabilir veya [GitHub bildirimi](https://github.com/AlperCetinkaya/DeepFocusMode/issues) açabilirsiniz. macOS ve uygulama sürümünü, sorunu tekrarlama adımlarını ekleyin. Özel ekran içeriklerini paylaşmayın.
+
+## Privacy / Gizlilik
+
+### Privacy Policy — English
+
+Deep Focus Mode — Privacy Policy
+Updated: October 30, 2026
+
+Deep Focus Mode operates entirely on your Mac. No account, backend, tracking, analytics, advertising or subscriptions are used.
+
+Window tracking processes window identifiers, application process identifiers, window positions and sizes in memory to place dimming overlays. It does not read window titles, capture screen images or monitor typed content. Mouse button and drag events trigger geometry updates; their history is not saved. No Accessibility or Screen Recording permission is requested.
+
+Dimming intensity and first-launch settings are stored locally in macOS preferences. They are not sent to us or any third party and remain until those preferences are removed. Dimming starts off each time the app launches. Disable Quick Focus or quit at any time to stop tracking and remove the overlays.
+
+Support links open GitHub in your browser or your email app only when you choose them. GitHub and your email provider process information you choose to submit under their own privacy policies. Avoid posting private window content in public issues.
+
+Contact: alper.cetinkaya.dev@gmail.com, or open an issue at github.com/AlperCetinkaya/DeepFocusMode. This policy describes the current app; future data handling changes will be reflected here.
+
+### Gizlilik Politikası — Türkçe
+
+Deep Focus Mode — Gizlilik Politikası
+Güncelleme: 30 Ekim 2026
+
+Deep Focus Mode tamamen Mac’inizde çalışır. Hesap, sunucu, takip, analiz, reklam veya abonelik kullanılmaz.
+
+Pencere takibi; karartma katmanlarını yerleştirmek için pencere kimliklerini, uygulama işlem kimliklerini, pencere konumlarını ve boyutlarını bellekte işler. Pencere başlıkları okunmaz, ekran görüntüsü alınmaz ve yazılan içerik izlenmez. Fare düğmesi ve sürükleme olayları konum güncellemelerini tetikler; bunların geçmişi kaydedilmez. Erişilebilirlik veya Ekran Kaydı izni istenmez.
+
+Karartma yoğunluğu ve ilk açılış ayarı macOS tercihlerinde yerel olarak saklanır. Bize veya üçüncü taraflara gönderilmez; tercihler kaldırılana kadar saklanır. Karartma her açılışta kapalı başlar. Takibi durdurmak ve katmanları kaldırmak için Hızlı Odak’ı kapatabilir veya uygulamadan çıkabilirsiniz.
+
+Destek bağlantıları yalnızca seçtiğinizde tarayıcınızda GitHub’ı veya e-posta uygulamanızı açar. GitHub’a veya e-posta sağlayıcınıza gönderdiğiniz bilgiler kendi gizlilik politikalarına tabidir. Herkese açık hata bildirimlerinde özel pencere içeriklerini paylaşmayın.
+
+İletişim: alper.cetinkaya.dev@gmail.com adresine yazabilir veya github.com/AlperCetinkaya/DeepFocusMode üzerinden hata bildirimi açabilirsiniz. Bu politika mevcut uygulamayı açıklar; veri işleme değişirse burada güncellenir.
