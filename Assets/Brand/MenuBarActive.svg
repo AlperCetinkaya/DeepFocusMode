@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<defs><clipPath id="body"><rect x="2" y="2" width="28" height="28" rx="7"/></clipPath></defs>
+<rect x="2" y="2" width="28" height="28" rx="7" fill="none" stroke="currentColor" stroke-width="1.7"/>
+<g clip-path="url(#body)"><circle cx="16" cy="13" r="6" fill="currentColor"/><path d="M2 19 C8 13 12 16 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2 25 C14 24 23 13 30 20 L30 31 L2 31 Z" fill="currentColor"/></g>
+</svg>

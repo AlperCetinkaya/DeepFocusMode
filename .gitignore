@@ -1,0 +1,18 @@
+.DS_Store
+build/
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcresult
+*.p12
+*.mobileprovision
+*.provisionprofile
+
+# Keep Markdown documents and Codex workspace files local.
+*.[mM][dD]
+*.markdown
+.codex/
+.agents/
+codex-clipboard-*
+codex-*.log

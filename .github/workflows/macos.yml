@@ -1,0 +1,30 @@
+name: macOS build and test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build sandbox configuration
+        run: >-
+          xcodebuild -project DeepFocusMode.xcodeproj -scheme DeepFocusMode
+          -configuration Release -destination 'platform=macOS'
+          -derivedDataPath build/CI-Sandbox build
+      - name: Test direct configuration
+        run: >-
+          xcodebuild -project DeepFocusMode.xcodeproj -scheme DeepFocusMode-Direct
+          -configuration Direct -destination 'platform=macOS'
+          -derivedDataPath build/CI-Direct
+          CODE_SIGN_STYLE=Automatic CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=
+          ENABLE_TESTABILITY=YES SWIFT_OPTIMIZATION_LEVEL=-Onone test
