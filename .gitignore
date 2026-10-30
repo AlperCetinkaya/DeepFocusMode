@@ -9,9 +9,10 @@ xcuserdata/
 *.mobileprovision
 *.provisionprofile
 
-# Keep Markdown documents and Codex workspace files local.
+# Publish only the root README; keep other Markdown and Codex files local.
 *.[mM][dD]
 *.markdown
+!/README.md
 .codex/
 .agents/
 codex-clipboard-*
