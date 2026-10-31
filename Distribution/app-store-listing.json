@@ -24,8 +24,7 @@
     }
   },
   "pendingAccountTasks": [
-    "Resolve the extra gray frame/inset seen in Apple icon preview; verify final store icon scale before review submission",
-    "Complete remaining compatibility checks: display hotplug, Stage Manager, sleep/wake and screen sharing",
+    "Complete remaining compatibility checks: display hotplug and screen sharing",
     "Approve final review submission separately"
   ],
   "supportEmail": "alper.cetinkaya.dev@gmail.com",
@@ -50,20 +49,26 @@
     "appReview": "not submitted",
     "release": "manual",
     "appleProcessing": "completed",
-    "selectedBuild": "2"
+    "selectedBuild": "3",
+    "uploadedBuild": "3",
+    "build3Upload": "completed",
+    "build3Processing": "completed: Ready to Submit"
   },
   "appIconReview": {
     "artwork": "Original owner-provided blue moon and dunes",
     "embeddedInUploadedBuild": true,
-    "visualGate": "Apple preview showed an extra gray rounded tile around the artwork; packaging/scale must be corrected and preview rechecked before submission",
+    "visualGate": "Passed: processed build 3 preview in App Store Connect has no extra gray tile",
     "localCandidateFormat": "Icon Composer package; original image unchanged, 112% layout scale, opaque dark background, layer glass disabled",
-    "candidateBuild": "3"
+    "candidateBuild": "3",
+    "verifiedBuild": "3"
   },
   "deviceQA": {
     "normalWindowSwitching": "owner confirmed",
     "missionControl": "owner confirmed",
     "fullScreenRoundTrip": "owner confirmed",
     "multipleDisplays": "owner confirmed: tested at noon on 2026-10-30",
-    "displayHotplug": "not yet confirmed"
+    "displayHotplug": "not yet confirmed",
+    "stageManager": "owner confirmed",
+    "sleepWake": "owner confirmed"
   }
 }
