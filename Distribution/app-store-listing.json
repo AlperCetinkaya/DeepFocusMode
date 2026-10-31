@@ -25,7 +25,7 @@
   },
   "pendingAccountTasks": [
     "Complete remaining compatibility checks: display hotplug and screen sharing",
-    "Approve final review submission separately"
+    "Await Apple review; release manually only after separate owner approval"
   ],
   "supportEmail": "alper.cetinkaya.dev@gmail.com",
   "availability": {
@@ -46,13 +46,15 @@
     "appleValidation": "passed",
     "upload": "completed",
     "privacyDeclaration": "published",
-    "appReview": "not submitted",
+    "appReview": "submitted",
     "release": "manual",
     "appleProcessing": "completed",
     "selectedBuild": "3",
     "uploadedBuild": "3",
     "build3Upload": "completed",
-    "build3Processing": "completed: Ready to Submit"
+    "build3Processing": "completed: Ready to Submit",
+    "submittedDate": "2026-10-31",
+    "submissionIdentifier": "9b1a8e9c-e3d8-4854-9279-b33584d09f4b"
   },
   "appIconReview": {
     "artwork": "Original owner-provided blue moon and dunes",

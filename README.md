@@ -28,7 +28,7 @@ Deep Focus Mode is a free, open-source native macOS menu bar app that dims the a
 
 ### Status and limitations
 
-Version **1.0.0 is a release candidate**, focused on Quick Focus. Window tracking now uses public Core Graphics metadata with the sandbox enabled. A separately signed sandbox probe enumerated external windows on a real Mac with both Accessibility and Screen Recording access denied. This is runtime evidence, not App Store approval. The signed App Store package has passed Apple validation and has been uploaded to App Store Connect. Final compatibility testing and review submission are still pending; no released download is available yet.
+Version **1.0.0 is a release candidate**, focused on Quick Focus. Window tracking now uses public Core Graphics metadata with the sandbox enabled. A separately signed sandbox probe enumerated external windows on a real Mac with both Accessibility and Screen Recording access denied. This is runtime evidence, not App Store approval. The signed App Store package has passed Apple validation and has been uploaded to App Store Connect. Version 1.0.0 (build 3) was submitted to Apple review on October 31, 2026. Release remains manual after approval. Display hotplug and screen sharing checks remain unconfirmed; no released download is available yet.
 
 Local sandbox validation passed **18 tests**, including real AppKit overlay rendering, rounded corners, display-edge geometry and input pass-through checks. CI builds the sandbox configuration and tests both sandbox and Direct configurations.
 
@@ -78,7 +78,7 @@ Deep Focus Mode, etkin pencerenin çevresini karartarak dikkat dağıtan alanlar
 
 ### Durum ve sınırlamalar
 
-**1.0.0 bir yayın adayıdır** ve Hızlı Odak özelliğine odaklanır. Pencere takibi artık sandbox açıkken herkese açık Core Graphics bilgilerini kullanır. Ayrı imzalanmış bir deneme uygulaması, gerçek Mac’te Erişilebilirlik ve Ekran Kaydı izinleri kapalıyken harici pencereleri listeledi. Bu çalışma kanıtıdır; App Store onayı değildir. Mağaza imzalı paket Apple doğrulamasından geçti ve App Store Connect’e yüklendi. Son uyumluluk testleri ve inceleme başvurusu henüz tamamlanmadı; indirilebilir yayınlanmış bir sürüm yoktur.
+**1.0.0 bir yayın adayıdır** ve Hızlı Odak özelliğine odaklanır. Pencere takibi artık sandbox açıkken herkese açık Core Graphics bilgilerini kullanır. Ayrı imzalanmış bir deneme uygulaması, gerçek Mac’te Erişilebilirlik ve Ekran Kaydı izinleri kapalıyken harici pencereleri listeledi. Bu çalışma kanıtıdır; App Store onayı değildir. Mağaza imzalı paket Apple doğrulamasından geçti ve App Store Connect’e yüklendi. 1.0.0 (yapı 3), 31 Ekim 2026 tarihinde Apple incelemesine gönderildi. Onay sonrasında yayınlama manuel yapılacak. Ekran bağlama/çıkarma ve ekran paylaşımı kontrolleri henüz doğrulanmadı; indirilebilir yayınlanmış bir sürüm yoktur.
 
 Gerçek AppKit katmanlarının çizimi, yuvarlak köşeler, ekran kenarı geometrisi ve tıklamaları geçirme kontrolleri dahil **sandbox açıkken 18 yerel test geçti**. CI hem sandbox hem Direct yapılandırmalarının testlerini çalıştırır.
 
